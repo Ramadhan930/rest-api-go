@@ -1,0 +1,10 @@
+# Binary files
+rest-api-go
+*.exe
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
