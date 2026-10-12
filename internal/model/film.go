@@ -11,6 +11,6 @@ type Film struct {
 	Tahun     int       `gorm:"not null" json:"Tahun"`
 	Genre     string    `gorm:"not null" json:"genre"`
 	Rating    float64   `json:"rating"`
-	CreateAt  time.Time `json:"created_at"`
-	UpdateAt  time.Time `json:"update_at"`
+	CreateAt  time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdateAt  time.Time `gorm:"autoUpdateTime" json:"update_at"`
 }
