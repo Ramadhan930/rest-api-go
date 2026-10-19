@@ -1,63 +1,37 @@
 package main
 
 import (
-	"fmt"
 	"log"
+
 	"rest-api-go/internal/config"
-	"rest-api-go/internal/model"
+	"rest-api-go/internal/handler"
 	"rest-api-go/internal/repository"
+	"rest-api-go/internal/router"
+	"rest-api-go/internal/service"
 	"rest-api-go/pkg/database"
 )
 
 func main() {
-	//load konfigurasi
+	// 1. Load Config
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatal("Gagal load config: ", err)
+		log.Fatal("Gagal load config:", err)
 	}
 
-	//koneksi ke database
+	// 2. Koneksi Database
 	db := database.ConnectDB(cfg)
+
+	// 3. Inisialisasi Layer (Repository -> Service -> Handler)
 	filmRepo := repository.NewFilmRepository(db)
+	filmService := service.NewFilmService(filmRepo)
+	filmHandler := handler.NewFilmHandler(filmService)
 
-	fmt.Printf("server berjalan di port %s\n", cfg.AppPort)
+	// 4. Setup Router
+	r := router.SetupRouter(filmHandler)
 
-	// 1. create
-	filmBaru := &model.Film{
-		Judul:     "interstellar",
-		Sutradara: "Chirstoper Nolan",
-		Tahun:     2014,
-		Genre:     "sci-fi",
-		Rating:    9.0,
+	// 5. Jalankan Server
+	log.Printf("Server berjalan di http://localhost:%s", cfg.AppPort)
+	if err := r.Run(":" + cfg.AppPort); err != nil {
+		log.Fatal("Gagal menjalankan server:", err)
 	}
-
-	if err := filmRepo.Create(filmBaru); err != nil {
-		log.Fatal("gagal create: ", err)
-	}
-	fmt.Println("film ditambahkan, ID: ", filmBaru.ID)
-
-	// 2. GetAll
-	films, err := filmRepo.GetAll()
-	if err != nil {
-		log.Fatal("gagal getAll:", err)
-	}
-	fmt.Println("daftar film:")
-	for _, f := range films {
-		fmt.Printf(" [%d] %s (%d) -%s | rating: %.1f\n", f.ID, f.Judul, f.Tahun, f.Sutradara, f.Rating)
-	}
-
-	// 3. GetByID
-	film, err := filmRepo.GetByID(filmBaru.ID)
-	if err != nil {
-		log.Fatal("gagal getByID: ", err)
-	}
-	fmt.Println("ditemukan: ", film.Judul)
-
-	// 4. Update
-	film.Rating = 9.5
-	if err := filmRepo.Update(film); err != nil {
-		log.Fatal("gagal update:", err)
-	}
-	fmt.Println("Rating diupdate jadi:", film.Rating)
-
 }

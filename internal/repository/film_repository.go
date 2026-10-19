@@ -13,6 +13,7 @@ type FilmRepository interface {
 	GetByID(id uint) (*model.Film, error)
 	Update(film *model.Film) error
 	Delete(id uint) error
+	GetByJudulAndTahun(judul string, tahun int) (*model.Film, error)
 }
 
 // struct: implementasi nyata
@@ -24,6 +25,15 @@ type filmRepository struct {
 
 func NewFilmRepository(db *gorm.DB) FilmRepository {
 	return &filmRepository{db: db}
+}
+
+func (r *filmRepository) GetByJudulAndTahun(judul string, tahun int) (*model.Film, error) {
+	var film model.Film
+	err := r.db.Where("judul = ? AND tahun = ?", judul, tahun).First(&film).Error
+	if err != nil {
+		return nil, err
+	}
+	return &film, nil
 }
 
 // implementasi 5 method
