@@ -1,9 +1,15 @@
-# Binary files
-rest-api-go
-*.exe
-
 # Environment
 .env
+
+# Binary
+main
+*.exe
+
+# Logs
+*.log
+
+# OS
+.DS_Store
 
 # IDE
 .vscode/
